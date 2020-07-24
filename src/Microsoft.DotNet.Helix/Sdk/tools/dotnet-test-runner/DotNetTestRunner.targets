@@ -1,0 +1,61 @@
+<Project>
+  <PropertyGroup>
+    <DotNetTestPublishTargetFramework Condition="'$(DotNetTestPublishTargetFramework)' == ''">netcoreapp2.1</DotNetTestPublishTargetFramework>
+    <DotNetTestTargetFramework Condition="'$(DotNetTestRuntimeTargetFramework)' == ''">netcoreapp2.0</DotNetTestTargetFramework>
+
+    <_DotNetTestPublishTargetsPath>$(MSBuildThisFileDirectory)DotNetTestPublish.targets</_DotNetTestPublishTargetsPath>
+  </PropertyGroup>
+
+  <Target Name="RestoreDotNetTestProjects"
+          Condition="'@(DotNetTestProject)' != ''"
+          BeforeTargets="Restore"
+          Outputs="%(DotNetTestProject.Identity)%(DotNetTestProject.TargetFramework)%(DotNetTestProject.RuntimeTargetFramework)%(DotNetTestProject.AdditionalProperties)">
+    <MSBuild Projects="%(DotNetTestProject.Identity)"
+             Targets="Restore"
+             Properties="CustomAfterMicrosoftCommonTargets=$(_DotNetTestPublishTargetsPath);%(DotNetTestProject.AdditionalProperties)">
+    </MSBuild>
+  </Target>
+
+  <Target Name="BuildDotNetTestProjects"
+          Condition="'@(DotNetTestProject)' != ''"
+          BeforeTargets="CoreBuild"
+          Outputs="%(DotNetTestProject.Identity)%(DotNetTestProject.TargetFramework)%(DotNetTestProject.RuntimeTargetFramework)%(DotNetTestProject.AdditionalProperties)">
+    <PropertyGroup>
+      <_CurrentDotNetTestProject>%(DotNetTestProject.Identity)</_CurrentDotNetTestProject>
+      <_CurrentPublishTargetFramework>%(DotNetTestProject.TargetFramework)</_CurrentPublishTargetFramework>
+      <_CurrentPublishTargetFramework Condition="'$(_CurrentPublishTargetFramework)' == ''">$(DotNetTestPublishTargetFramework)</_CurrentPublishTargetFramework>
+      <_CurrentRuntimeTargetFramework>%(DotNetTestProject.RuntimeTargetFramework)</_CurrentRuntimeTargetFramework>
+      <_CurrentRuntimeTargetFramework Condition="'$(_CurrentRuntimeTargetFramework)' == ''">$(DotNetTestTargetFramework)</_CurrentRuntimeTargetFramework>
+      <_CurrentAdditionalProperties>%(DotNetTestProject.AdditionalProperties)</_CurrentAdditionalProperties>
+    </PropertyGroup>
+    <MSBuild Projects="$(_CurrentDotNetTestProject)" Targets="PublishWithOutput" Properties="CustomAfterMicrosoftCommonTargets=$(_DotNetTestPublishTargetsPath);TargetFramework=$(_CurrentPublishTargetFramework);$(_CurrentAdditionalProperties)">
+      <Output TaskParameter="TargetOutputs" PropertyName="_PublishOutputDir" />
+    </MSBuild>
+    <MSBuild Projects="$(_CurrentDotNetTestProject)" Targets="GetTargetPath" Properties="CustomAfterMicrosoftCommonTargets=$(_DotNetTestPublishTargetsPath);TargetFramework=$(_CurrentPublishTargetFramework);$(_CurrentAdditionalProperties)">
+      <Output TaskParameter="TargetOutputs" PropertyName="_TargetPath" />
+    </MSBuild>
+
+    <ItemGroup>
+      <DotNetTestProject Condition="'%(Identity)' == '$(_CurrentDotNetTestProject)'">
+        <PublishDirectory>$(_PublishOutputDir)</PublishDirectory>
+        <TargetPath>$(_TargetPath)</TargetPath>
+        <PublishTargetFramework>$(_CurrentPublishTargetFramework)</PublishTargetFramework>
+        <RuntimeTargetFramework>$(_CurrentRuntimeTargetFramework)</RuntimeTargetFramework>
+      </DotNetTestProject>
+    </ItemGroup>
+  </Target>
+
+  
+  <Target Name="CreateDotNetTestWorkItems"
+          Condition="'@(DotNetTestProject)' != ''"
+          BeforeTargets="CoreTest">
+    <CreateDotNetTestWorkItems
+      Projects="@(DotNetTestProject)"
+      IsPosixShell="$(IsPosixShell)"
+      Arguments="$(DotNetTestArguments)"
+      WorkItemTimeout="$(DotNetTestWorkItemTimeout)">
+      <Output TaskParameter="WorkItems" ItemName="HelixWorkItem"/>
+    </CreateDotNetTestWorkItems>
+  </Target>
+
+</Project>

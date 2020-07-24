@@ -40,13 +40,21 @@
   </ItemGroup>
 
   <ItemGroup>
-    <XUnitProject Include="..\src\**\*.Tests.csproj"/>
+    <_HelixableProjecs Include="..\src\**\*.Tests.csproj"></_HelixableProjecs>
 
     <!-- Remove the arcade sdk tests project because it depends heavily on machine/repo state and doesn't work properly in helix yet -->
-    <XUnitProject Remove="..\src\Microsoft.DotNet.Arcade.Sdk.Tests\Microsoft.DotNet.Arcade.Sdk.Tests.csproj"/>
+    <_HelixableProjecs Remove="..\src\Microsoft.DotNet.Arcade.Sdk.Tests\Microsoft.DotNet.Arcade.Sdk.Tests.csproj"/>
 
     <!-- Exclude tests that do not target .NET Core -->
-    <XUnitProject Remove="..\src\Microsoft.DotNet.Build.Tasks.VisualStudio.Tests\Microsoft.DotNet.Build.Tasks.VisualStudio.Tests.csproj"/>
+    <_HelixableProjecs Remove="..\src\Microsoft.DotNet.Build.Tasks.VisualStudio.Tests\Microsoft.DotNet.Build.Tasks.VisualStudio.Tests.csproj"/>
+
+    <XUnitProject Include="@(_HelixableProjecs)">
+      <WorkItemNamePrefix>XunitRunner.</WorkItemNamePrefix>
+    </XUnitProject>>
+
+    <DotNetTestProject Include="@(_HelixableProjecs)">
+      <WorkItemNamePrefix>DotNetTestRunner.</WorkItemNamePrefix>
+    </DotNetTestProject>
   </ItemGroup>
 
   <ItemGroup Condition=" '$(HelixAccessToken)' != '' ">

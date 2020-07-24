@@ -1,0 +1,5 @@
+<Project>
+  <PropertyGroup>
+    <_HelixMonoQueueTargets>$(_HelixMonoQueueTargets);$(MSBuildThisFileDirectory)DotNetTestRunner.targets</_HelixMonoQueueTargets>
+  </PropertyGroup>
+</Project>
