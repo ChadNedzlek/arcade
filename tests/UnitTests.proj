@@ -50,7 +50,7 @@
 
     <XUnitProject Include="@(_HelixableProjecs)">
       <WorkItemNamePrefix>XunitRunner.</WorkItemNamePrefix>
-    </XUnitProject>>
+    </XUnitProject>
 
     <DotNetTestProject Include="@(_HelixableProjecs)">
       <WorkItemNamePrefix>DotNetTestRunner.</WorkItemNamePrefix>
