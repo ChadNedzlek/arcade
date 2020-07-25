@@ -89,11 +89,13 @@ namespace Microsoft.DotNet.Helix.Sdk
 
             string assemblyName = Path.GetFileName(targetPath);
 
+            string rollForward = IsPosixShell ? "export DOTNET_ROLL_FORWARD=major" : "SET DOTNET_ROLL_FORWARD=major";
+
             string loggerArg = IsPosixShell ?
                 "--logger \"trx;LogFileName=${HELIX_WORKITEM_ROOT}/testResults.trx\"" :
                 "--logger \"trx;LogFileName=%HELIX_WORKITEM_ROOT%\\testResults.trx\"";
 
-            string command = $"dotnet test {assemblyName}{(Arguments != null ? " " + Arguments : "")} {loggerArg} {arguments}";
+            string command = $"{rollForward}&& dotnet test {assemblyName} {loggerArg} {(Arguments != null ? " " + Arguments : "")} {arguments} ";
 
             Log.LogMessage($"Creating work item with properties Identity: {assemblyName}, PayloadDirectory: {publishDirectory}, Command: {command}");
 
@@ -108,7 +110,7 @@ namespace Microsoft.DotNet.Helix.Sdk
 
             if (!project.TryGetMetadata("WorkItemName", out string workItemName))
             {
-                if (!project.TryGetMetadata("WorkItemNamePrefix", out string workItemNamePrefix))
+                if (project.TryGetMetadata("WorkItemNamePrefix", out string workItemNamePrefix))
                 {
                     workItemName = workItemNamePrefix + assemblyName;
                 }
@@ -118,9 +120,8 @@ namespace Microsoft.DotNet.Helix.Sdk
                 }
             }
 
-            return new Microsoft.Build.Utilities.TaskItem(assemblyName, new Dictionary<string, string>()
+            return new Microsoft.Build.Utilities.TaskItem(workItemName, new Dictionary<string, string>()
             {
-                { "Identity", workItemName },
                 { "PayloadDirectory", publishDirectory },
                 { "Command", command },
                 { "Timeout", timeout.ToString() },

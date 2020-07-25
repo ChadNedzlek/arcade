@@ -145,7 +145,7 @@ namespace Microsoft.DotNet.Helix.Sdk
 
             if (!xunitProject.TryGetMetadata("WorkItemName", out string workItemName))
             {
-                if (!xunitProject.TryGetMetadata("WorkItemNamePrefix", out string workItemNamePrefix))
+                if (xunitProject.TryGetMetadata("WorkItemNamePrefix", out string workItemNamePrefix))
                 {
                     workItemName = workItemNamePrefix + assemblyName;
                 }
@@ -154,9 +154,9 @@ namespace Microsoft.DotNet.Helix.Sdk
                     workItemName = assemblyName;
                 }
             }
-            return new Microsoft.Build.Utilities.TaskItem(assemblyName, new Dictionary<string, string>()
+
+            return new Microsoft.Build.Utilities.TaskItem(workItemName, new Dictionary<string, string>()
             {
-                { "Identity", workItemName },
                 { "PayloadDirectory", publishDirectory },
                 { "Command", command },
                 { "Timeout", timeout.ToString() },

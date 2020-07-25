@@ -55,6 +55,7 @@
     <DotNetTestProject Include="@(_HelixableProjecs)">
       <WorkItemNamePrefix>DotNetTestRunner.</WorkItemNamePrefix>
     </DotNetTestProject>
+    <DotNetTestProject Remove="DotNetTestRunner.Microsoft.DotNet.RemoteExecutor"/>
   </ItemGroup>
 
   <ItemGroup Condition=" '$(HelixAccessToken)' != '' ">
